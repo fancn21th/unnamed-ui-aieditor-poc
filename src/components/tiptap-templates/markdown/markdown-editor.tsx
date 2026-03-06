@@ -1,4 +1,3 @@
-import "github-markdown-css/github-markdown-dark-colorblind.css";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "@tiptap/markdown";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
