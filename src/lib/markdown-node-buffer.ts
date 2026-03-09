@@ -13,8 +13,8 @@ import type {
  * incomplete inline syntax, and emits BufferMessage objects to Layer 3
  * via the provided `onMessage` callback.
  *
- * State invariant: if `accumulated` is non-empty then `currentNodeId`
- * is always set (non-null).
+ * State invariant: if `accumulated` has non-whitespace content then
+ * `currentNodeId` is always set (non-null).
  */
 export class MarkdownNodeBuffer {
   private accumulated: string = "";
@@ -67,9 +67,12 @@ export class MarkdownNodeBuffer {
     }
 
     // ── Process remainder (current partial node) ───────────────────────
+    // Keep accumulated so leading whitespace is preserved when more
+    // content arrives, but only emit when there is visible content —
+    // whitespace-only strings produce empty ProseMirror fragments.
     this.accumulated = remainder;
 
-    if (remainder !== "") {
+    if (remainder.trim() !== "") {
       if (this.currentNodeId === null) {
         this.currentNodeId = this.generateNodeId();
         this.emit({

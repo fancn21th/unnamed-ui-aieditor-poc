@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a React + TypeScript + Vite project implementing a rich text editor using Tiptap. The editor features a comprehensive toolbar with formatting options, image uploads, and responsive mobile/desktop layouts.
+This is a React + TypeScript + Vite project implementing a rich text editor using Tiptap with a **3-layer streaming markdown pipeline**. The editor receives markdown content incrementally (simulating LLM streaming), buffers it into block-level nodes, heals incomplete syntax via `remend`, and renders incrementally into the Tiptap editor.
 
 ## Development Commands
 
@@ -20,9 +20,37 @@ npm run lint
 
 # Preview production build
 npm run preview
+
+# Run unit tests (vitest)
+npm test
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
 ## Architecture
+
+### Streaming Pipeline (3 Layers)
+
+```
+Layer 1: createStreamSimulator          src/lib/stream-simulator.ts
+  → AsyncGenerator, random chunk size (3–25 chars), configurable delay
+  → for-await loop feeds chunks to Layer 2
+
+Layer 2: MarkdownNodeBuffer             src/lib/markdown-node-buffer.ts
+  ├── splitMarkdownNodes()              src/lib/markdown-node-splitter.ts
+  │   (detects \n\n block boundaries, code-fence aware)
+  ├── Receive: accumulate chunks, remend() to heal incomplete syntax
+  └── Send: emit BufferMessage { nodeId, actualContent, completedContent, status }
+
+Layer 3: useStreamingEditor             src/hooks/use-streaming-editor.ts
+  → start:    insertContentAt(pos, completedContent)
+  → updating: insertContentAt({from,to}, completedContent)
+  → end:      insertContentAt({from,to}, actualContent)
+  → scrollToBottom via requestAnimationFrame + Element.scrollIntoView
+```
+
+Shared types: `src/lib/streaming-types.ts` — `NodeStatus`, `BufferMessage`, `MarkdownNodeBufferOptions`
 
 ### Component Structure
 
@@ -33,9 +61,9 @@ The codebase follows a modular architecture organized into distinct layers:
 - **`src/components/tiptap-node/`** - Custom Tiptap node extensions and their styling (ImageUploadNode, HorizontalRule, etc.)
 - **`src/components/tiptap-extension/`** - Custom Tiptap extensions (NodeBackground, etc.)
 - **`src/components/tiptap-icons/`** - SVG icon components
-- **`src/components/tiptap-templates/`** - Complete editor implementations (SimpleEditor)
+- **`src/components/tiptap-templates/`** - Complete editor implementations (SimpleEditor, MarkdownEditor)
 - **`src/hooks/`** - Reusable React hooks for editor functionality
-- **`src/lib/`** - Utility functions
+- **`src/lib/`** - Utility functions and streaming pipeline
 
 ### Key Patterns
 
@@ -50,9 +78,12 @@ The codebase follows a modular architecture organized into distinct layers:
 
 4. **Path Aliases**: Uses `@/` alias for `./src/` (configured in tsconfig.json and vite.config.ts)
 
+5. **Streaming Buffer**: Layer 2 is a pure TypeScript class (no React dependency) for testability. It uses `\n\n` as block-level node boundaries (code-fence aware) and `remend` for incomplete markdown syntax healing. Known limitation: loose lists (`- a\n\n- b`) are split into separate nodes.
+
 ## Tiptap Extensions
 
-The editor is configured with:
+### SimpleEditor
+
 - StarterKit (basic formatting)
 - Custom HorizontalRule node
 - TextAlign, TaskList, TaskItem
@@ -60,8 +91,27 @@ The editor is configured with:
 - Superscript, Subscript, Selection
 - ImageUploadNode (custom with upload handling)
 
+### MarkdownEditor
+
+- StarterKit (basic formatting)
+- Markdown (with GFM mode via `markedOptions: { gfm: true }`)
+- Table, TableRow, TableCell, TableHeader
+- TaskList, TaskItem
+
 ## Styling
 
 - Uses SCSS for styling
 - Node-specific styles are in `src/components/tiptap-node/*/` directories
-- Main editor styles in `src/components/tiptap-templates/simple/simple-editor.scss`
+- SimpleEditor styles in `src/components/tiptap-templates/simple/simple-editor.scss`
+- MarkdownEditor styles in `src/components/tiptap-templates/markdown/markdown-editor.scss` (includes GFM table styles)
+
+## Testing
+
+- Test framework: Vitest (node environment)
+- Test files: `src/lib/__tests__/*.test.ts`
+- Coverage: stream-simulator (5), markdown-node-splitter (48), markdown-node-buffer (36) = 89 tests
+- Layer 2 tests cover all GFM block types: paragraphs, headings, code blocks, blockquotes, lists, tables, thematic breaks, and inline syntax healing via remend
+
+## External Dependencies
+
+- **`remend`** (v1.2.2) — Self-healing markdown preprocessor for streaming. Closes unclosed `**`, `*`, `` ` ``, `~~`, `[](`, etc. Used in Layer 2 to generate safe-to-render `completedContent` from partial markdown chunks.

@@ -24,7 +24,7 @@ import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss"
 // Editor styles
 import "@/components/tiptap-templates/markdown/markdown-editor.scss";
 
-import gfmContent from "./data/gfm-example.md?raw";
+import gfmContent from "./data/gfm-simple.md?raw";
 
 export function MarkdownEditor() {
   const editor = useEditor({

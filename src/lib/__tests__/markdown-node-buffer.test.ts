@@ -391,17 +391,28 @@ describe("Edge cases", () => {
     expect(endMsg.actualContent).toBe("你好世界");
   });
 
-  it("whitespace-only chunk does not create an empty node", () => {
+  it("whitespace-only chunk does not emit messages", () => {
     const msgs: BufferMessage[] = [];
     const buf = makeBuffer(msgs);
 
     buf.push("   ");
     buf.push("\n\n");
-    // The "   " chunk has whitespace, but it still goes out as a node
-    // (splitMarkdownNodes decides boundary only, not content filtering)
-    // At minimum: no crash and messages have non-empty nodeId
-    for (const m of msgs) {
-      expect(m.nodeId).toBeTruthy();
-    }
+    // Whitespace-only remainder is not emitted. The splitter also
+    // filters whitespace-only complete nodes. No messages at all.
+    expect(msgs).toHaveLength(0);
+  });
+
+  it("whitespace-only remainder followed by real content emits correctly", () => {
+    const msgs: BufferMessage[] = [];
+    const buf = makeBuffer(msgs);
+
+    buf.push("\n");
+    expect(msgs).toHaveLength(0); // "\n" is whitespace-only, no emit
+
+    buf.push("hello");
+    expect(msgs.length).toBeGreaterThan(0);
+    const last = msgs[msgs.length - 1];
+    expect(last.actualContent).toBe("\nhello");
+    expect(last.status).toBe("start");
   });
 });

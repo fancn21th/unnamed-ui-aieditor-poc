@@ -34,6 +34,12 @@ export function useStreamingEditor(editor: Editor | null) {
     (msg: BufferMessage) => {
       if (!editor) return;
 
+      // Guard: whitespace-only content produces empty ProseMirror fragments
+      // which throw "Invalid content for node doc".
+      const content =
+        msg.status === "end" ? msg.actualContent : msg.completedContent;
+      if (!content.trim()) return;
+
       if (msg.status === "start") {
         // Record where this node begins, then insert the healed content.
         const insertPos = editor.state.doc.content.size;
