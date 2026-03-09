@@ -40,37 +40,47 @@ export function useStreamingEditor(editor: Editor | null) {
         msg.status === "end" ? msg.actualContent : msg.completedContent;
       if (!content.trim()) return;
 
-      if (msg.status === "start") {
-        // Record where this node begins, then insert the healed content.
-        const insertPos = editor.state.doc.content.size;
-        nodeStartPosRef.current = insertPos;
-        editor.commands.insertContentAt(insertPos, msg.completedContent, {
-          contentType: "markdown",
-        });
-      } else if (msg.status === "updating") {
-        if (nodeStartPosRef.current === null) return;
-        const from = nodeStartPosRef.current;
-        const to = editor.state.doc.content.size;
-        if (from < to) {
-          editor.commands.insertContentAt({ from, to }, msg.completedContent, {
+      try {
+        if (msg.status === "start") {
+          // Record where this node begins, then insert the healed content.
+          const insertPos = editor.state.doc.content.size;
+          nodeStartPosRef.current = insertPos;
+          editor.commands.insertContentAt(insertPos, msg.completedContent, {
             contentType: "markdown",
           });
+        } else if (msg.status === "updating") {
+          if (nodeStartPosRef.current === null) return;
+          const from = nodeStartPosRef.current;
+          const to = editor.state.doc.content.size;
+          if (from < to) {
+            editor.commands.insertContentAt(
+              { from, to },
+              msg.completedContent,
+              { contentType: "markdown" },
+            );
+          }
+        } else if (msg.status === "end") {
+          if (nodeStartPosRef.current === null) return;
+          const from = nodeStartPosRef.current;
+          const to = editor.state.doc.content.size;
+          if (from < to) {
+            editor.commands.insertContentAt({ from, to }, msg.actualContent, {
+              contentType: "markdown",
+            });
+          } else {
+            // Edge case: node completed before any partial insert happened
+            editor.commands.insertContentAt(from, msg.actualContent, {
+              contentType: "markdown",
+            });
+          }
+          nodeStartPosRef.current = null;
         }
-      } else if (msg.status === "end") {
-        if (nodeStartPosRef.current === null) return;
-        const from = nodeStartPosRef.current;
-        const to = editor.state.doc.content.size;
-        if (from < to) {
-          editor.commands.insertContentAt({ from, to }, msg.actualContent, {
-            contentType: "markdown",
-          });
-        } else {
-          // Edge case: node completed before any partial insert happened
-          editor.commands.insertContentAt(from, msg.actualContent, {
-            contentType: "markdown",
-          });
-        }
-        nodeStartPosRef.current = null;
+      } catch {
+        // During streaming, partial markdown (e.g. "> " without body text)
+        // can produce nodes that violate ProseMirror's schema (e.g. an empty
+        // blockquote).  These transient errors are harmless — the next chunk
+        // will supply valid content — so we silently skip the update.
+        return;
       }
 
       scrollToBottom();
