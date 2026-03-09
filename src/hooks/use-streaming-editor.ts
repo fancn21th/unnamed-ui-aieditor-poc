@@ -16,6 +16,19 @@ import type { BufferMessage } from "@/lib/streaming-types";
 export function useStreamingEditor(editor: Editor | null) {
   // Start position of the currently in-progress node in the ProseMirror doc.
   const nodeStartPosRef = useRef<number | null>(null);
+  const rafRef = useRef<number>(0);
+
+  /** Scroll the last rendered element into view after the DOM updates. */
+  const scrollToBottom = useCallback(() => {
+    if (!editor) return;
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      editor.view.dom.lastElementChild?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    });
+  }, [editor]);
 
   const processMessage = useCallback(
     (msg: BufferMessage) => {
@@ -53,12 +66,15 @@ export function useStreamingEditor(editor: Editor | null) {
         }
         nodeStartPosRef.current = null;
       }
+
+      scrollToBottom();
     },
-    [editor],
+    [editor, scrollToBottom],
   );
 
   const reset = useCallback(() => {
     nodeStartPosRef.current = null;
+    cancelAnimationFrame(rafRef.current);
   }, []);
 
   return { processMessage, reset };

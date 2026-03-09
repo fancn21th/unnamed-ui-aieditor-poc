@@ -2,5 +2,6 @@
 import { MarkdownEditor } from "@/components/tiptap-templates/markdown/markdown-editor";
 
 export default function App() {
+  // return <SimpleEditor />;
   return <MarkdownEditor />;
 }

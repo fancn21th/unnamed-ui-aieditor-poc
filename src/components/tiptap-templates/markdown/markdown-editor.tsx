@@ -13,7 +13,18 @@ import { createStreamSimulator } from "@/lib/stream-simulator";
 import { MarkdownNodeBuffer } from "@/lib/markdown-node-buffer";
 import { useStreamingEditor } from "@/hooks/use-streaming-editor";
 
-import gfmContent from "./data/gfm-simple.md?raw";
+// Node styles
+import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
+import "@/components/tiptap-node/heading-node/heading-node.scss";
+import "@/components/tiptap-node/list-node/list-node.scss";
+import "@/components/tiptap-node/code-block-node/code-block-node.scss";
+import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
+import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
+
+// Editor styles
+import "@/components/tiptap-templates/markdown/markdown-editor.scss";
+
+import gfmContent from "./data/gfm-example.md?raw";
 
 export function MarkdownEditor() {
   const editor = useEditor({
@@ -31,6 +42,14 @@ export function MarkdownEditor() {
     ],
     content: "",
     contentType: "markdown",
+    editorProps: {
+      attributes: {
+        autocomplete: "off",
+        autocorrect: "off",
+        autocapitalize: "off",
+        class: "markdown-editor",
+      },
+    },
   });
 
   const { processMessage, reset } = useStreamingEditor(editor);
@@ -71,10 +90,12 @@ export function MarkdownEditor() {
   }, [editor, processMessage, reset]);
 
   return (
-    <div>
-      <EditorContext.Provider value={{ editor }}>
-        <EditorContent editor={editor} role="presentation" />
-      </EditorContext.Provider>
+    <div className="markdown-editor-wrapper">
+      <div className="markdown-editor-content">
+        <EditorContext.Provider value={{ editor }}>
+          <EditorContent editor={editor} role="presentation" />
+        </EditorContext.Provider>
+      </div>
     </div>
   );
 }
