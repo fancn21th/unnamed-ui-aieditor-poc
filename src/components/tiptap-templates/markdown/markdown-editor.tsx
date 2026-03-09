@@ -7,15 +7,13 @@ import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TaskList } from "@tiptap/extension-task-list";
 import { TaskItem } from "@tiptap/extension-task-item";
-import { useInsertMarkdown } from "@/hooks/use-insert-markdown";
-import { chunkText } from "@/lib/chunk-text";
-import remend from "remend";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+
+import { createStreamSimulator } from "@/lib/stream-simulator";
+import { MarkdownNodeBuffer } from "@/lib/markdown-node-buffer";
+import { useStreamingEditor } from "@/hooks/use-streaming-editor";
 
 import gfmContent from "./data/gfm-simple.md?raw";
-// import gfmContent from "./data/gfm-example.md?raw";
-
-const chunks = chunkText(gfmContent);
 
 export function MarkdownEditor() {
   const editor = useEditor({
@@ -35,30 +33,42 @@ export function MarkdownEditor() {
     contentType: "markdown",
   });
 
-  const { insertMarkdown } = useInsertMarkdown(editor);
-
-  const indexRef = useRef(0);
+  const { processMessage, reset } = useStreamingEditor(editor);
 
   useEffect(() => {
     if (!editor) return;
 
-    console.log("start inserting markdown chunks...");
+    let aborted = false;
 
-    const interval = setInterval(() => {
-      if (indexRef.current < chunks.length) {
-        const chunk = chunks[indexRef.current];
-        const remendedChunk = remend(chunk);
-        if (remendedChunk.trim()) {
-          insertMarkdown(remendedChunk);
-        }
-        indexRef.current++;
-      } else {
-        clearInterval(interval);
+    const buffer = new MarkdownNodeBuffer({
+      onMessage: processMessage,
+    });
+
+    const run = async () => {
+      const stream = createStreamSimulator(gfmContent, {
+        minChunkSize: 3,
+        maxChunkSize: 25,
+        delayMs: 50,
+        delayJitter: 30,
+      });
+
+      for await (const chunk of stream) {
+        if (aborted) break;
+        buffer.push(chunk);
       }
-    }, 100);
 
-    return () => clearInterval(interval);
-  }, [editor]);
+      if (!aborted) {
+        buffer.done();
+      }
+    };
+
+    run();
+
+    return () => {
+      aborted = true;
+      reset();
+    };
+  }, [editor, processMessage, reset]);
 
   return (
     <div>
