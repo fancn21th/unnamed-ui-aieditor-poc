@@ -67,7 +67,7 @@ export function MarkdownEditor() {
       const stream = createStreamSimulator(gfmContent, {
         minChunkSize: 3,
         maxChunkSize: 25,
-        delayMs: 50,
+        delayMs: 150,
         delayJitter: 30,
       });
 
