@@ -17,6 +17,10 @@ export function useStreamingEditor(editor: Editor | null) {
   // Start position of the currently in-progress node in the ProseMirror doc.
   const nodeStartPosRef = useRef<number | null>(null);
   const rafRef = useRef<number>(0);
+  const insertOptions = {
+    contentType: "markdown" as const,
+    updateSelection: false,
+  };
 
   /** Scroll the last rendered element into view after the DOM updates. */
   const scrollToBottom = useCallback(() => {
@@ -28,6 +32,14 @@ export function useStreamingEditor(editor: Editor | null) {
         block: "end",
       });
     });
+  }, [editor]);
+
+  const clearNativeSelection = useCallback(() => {
+    if (!editor) return;
+    if (editor.isFocused) return;
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
+    selection.removeAllRanges();
   }, [editor]);
 
   const processMessage = useCallback(
@@ -45,9 +57,11 @@ export function useStreamingEditor(editor: Editor | null) {
           // Record where this node begins, then insert the healed content.
           const insertPos = editor.state.doc.content.size;
           nodeStartPosRef.current = insertPos;
-          editor.commands.insertContentAt(insertPos, msg.completedContent, {
-            contentType: "markdown",
-          });
+          editor.commands.insertContentAt(
+            insertPos,
+            msg.completedContent,
+            insertOptions,
+          );
         } else if (msg.status === "updating") {
           if (nodeStartPosRef.current === null) return;
           const from = nodeStartPosRef.current;
@@ -56,7 +70,7 @@ export function useStreamingEditor(editor: Editor | null) {
             editor.commands.insertContentAt(
               { from, to },
               msg.completedContent,
-              { contentType: "markdown" },
+              insertOptions,
             );
           }
         } else if (msg.status === "end") {
@@ -64,14 +78,14 @@ export function useStreamingEditor(editor: Editor | null) {
           const from = nodeStartPosRef.current;
           const to = editor.state.doc.content.size;
           if (from < to) {
-            editor.commands.insertContentAt({ from, to }, msg.actualContent, {
-              contentType: "markdown",
-            });
+            editor.commands.insertContentAt(
+              { from, to },
+              msg.actualContent,
+              insertOptions,
+            );
           } else {
             // Edge case: node completed before any partial insert happened
-            editor.commands.insertContentAt(from, msg.actualContent, {
-              contentType: "markdown",
-            });
+            editor.commands.insertContentAt(from, msg.actualContent, insertOptions);
           }
           nodeStartPosRef.current = null;
         }
@@ -83,9 +97,10 @@ export function useStreamingEditor(editor: Editor | null) {
         return;
       }
 
+      clearNativeSelection();
       scrollToBottom();
     },
-    [editor, scrollToBottom],
+    [editor, scrollToBottom, clearNativeSelection],
   );
 
   const reset = useCallback(() => {
