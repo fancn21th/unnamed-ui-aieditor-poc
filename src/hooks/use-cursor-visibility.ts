@@ -36,29 +36,31 @@ export function useCursorVisibility({
   useEffect(() => {
     const ensureCursorVisibility = () => {
       if (!editor) return
+      try {
+        const view = editor.view
+        const { state } = editor
+        if (!view?.hasFocus?.()) return
 
-      const { state, view } = editor
-      if (!view.hasFocus()) return
+        const { from } = state.selection
+        const cursorCoords = view.coordsAtPos(from)
 
-      // Get current cursor position coordinates
-      const { from } = state.selection
-      const cursorCoords = view.coordsAtPos(from)
+        if (windowHeight < rect.height && cursorCoords) {
+          const availableSpace = windowHeight - cursorCoords.top
 
-      if (windowHeight < rect.height && cursorCoords) {
-        const availableSpace = windowHeight - cursorCoords.top
+          if (availableSpace < overlayHeight) {
+            const targetCursorY = Math.max(windowHeight / 2, overlayHeight)
+            const currentScrollY = window.scrollY
+            const cursorAbsoluteY = cursorCoords.top + currentScrollY
+            const newScrollY = cursorAbsoluteY - targetCursorY
 
-        // If the cursor is hidden behind the overlay or offscreen, scroll it into view
-        if (availableSpace < overlayHeight) {
-          const targetCursorY = Math.max(windowHeight / 2, overlayHeight)
-          const currentScrollY = window.scrollY
-          const cursorAbsoluteY = cursorCoords.top + currentScrollY
-          const newScrollY = cursorAbsoluteY - targetCursorY
-
-          window.scrollTo({
-            top: Math.max(0, newScrollY),
-            behavior: "smooth",
-          })
+            window.scrollTo({
+              top: Math.max(0, newScrollY),
+              behavior: "smooth",
+            })
+          }
         }
+      } catch {
+        return
       }
     }
 

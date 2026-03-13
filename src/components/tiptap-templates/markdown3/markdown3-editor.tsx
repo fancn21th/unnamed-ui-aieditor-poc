@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
+import {
+  EditorContent,
+  EditorContext,
+  useEditor,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "@tiptap/markdown";
 import { Image } from "@tiptap/extension-image";
@@ -12,6 +16,10 @@ import { Typography } from "@tiptap/extension-typography";
 import { Highlight } from "@tiptap/extension-highlight";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 
 import { Button } from "@/components/tiptap-ui-primitive/button";
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer";
@@ -59,6 +67,9 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 import { useStreamingEditor } from "@/hooks/use-streaming-editor";
 
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
+import { NodeLock } from "@/components/tiptap-extension/node-lock-extension";
+import { Markdown3BubbleMenu } from "@/components/tiptap-templates/markdown3/components/markdown3-bubble-menu";
+import { TiptapDevModal } from "@/components/tiptap-dev-modal";
 
 import { createStreamSimulator } from "@/lib/stream-simulator";
 import { MarkdownNodeBuffer } from "@/lib/markdown-node-buffer";
@@ -66,6 +77,16 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 import "@/components/tiptap-templates/markdown3/markdown3-editor.scss";
 import content from "@/components/tiptap-templates/markdown3/data/gfm-simple.md?raw";
+import htmlContent from "/mockData/test.html?raw";
+const LOCKABLE_NODE_TYPES = [
+  "paragraph",
+  "heading",
+  "blockquote",
+  "taskList",
+  "bulletList",
+  "orderedList",
+  "codeBlock",
+];
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -202,11 +223,18 @@ export function Markdown3Editor() {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableCell,
+      TableHeader,
       Highlight.configure({ multicolor: true }),
       Image,
       Typography,
       Superscript,
       Subscript,
+      NodeLock.configure({
+        types: LOCKABLE_NODE_TYPES,
+      }),
       ImageUploadNode.configure({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
@@ -215,8 +243,8 @@ export function Markdown3Editor() {
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],
-    content: "",
-    contentType: "markdown",
+    content: htmlContent,
+    contentType: "html",
   });
 
   const { processMessage, reset } = useStreamingEditor(editor);
@@ -293,11 +321,19 @@ export function Markdown3Editor() {
           )}
         </Toolbar>
 
+        {editor && (
+          <Markdown3BubbleMenu
+            editor={editor}
+            lockableNodeTypes={LOCKABLE_NODE_TYPES}
+          />
+        )}
+
         <EditorContent
           editor={editor}
           role="presentation"
           className="mardown3-editor-content"
         />
+        <TiptapDevModal editor={editor} />
       </EditorContext.Provider>
     </div>
   );

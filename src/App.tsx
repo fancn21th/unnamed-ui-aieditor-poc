@@ -1,8 +1,5 @@
-// import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
-// import { MarkdownEditor } from "@/components/tiptap-templates/markdown/markdown-editor";
-import { Markdown3Editor } from  "@/components/tiptap-templates/markdown3/markdown3-editor";
+import { MarkdownSnapshotLocalV2Editor } from "@/components/tiptap-templates/markdown-snapshot-local-v2";
 
 export default function App() {
-  // return <SimpleEditor />;
-  return <Markdown3Editor />;
+  return <MarkdownSnapshotLocalV2Editor />;
 }

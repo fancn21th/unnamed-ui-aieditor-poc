@@ -54,13 +54,98 @@ body,
   font-family: "DM Sans", sans-serif;
 }
 
-.mardown3-editor-wrapper {
+.markdown-snapshot-editor-wrapper {
   width: 100vw;
   height: 100vh;
   overflow: auto;
+  padding-top: 3.5rem;
 }
 
-.mardown3-editor-content {
+.markdown-snapshot-controls {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(22rem, calc(100vw - 1.5rem));
+  border: 1px solid var(--tt-gray-light-a-100);
+  border-radius: var(--tt-radius-lg);
+  background: color-mix(in oklab, var(--tt-bg-color) 90%, white);
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.18);
+  padding: 0.75rem;
+
+  .dark & {
+    border-color: var(--tt-gray-dark-a-100);
+    background: color-mix(in oklab, var(--tt-bg-color) 92%, black);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  }
+}
+
+.markdown-snapshot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.markdown-snapshot-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--tt-muted-foreground);
+}
+
+.markdown-snapshot-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.markdown-snapshot-versions {
+  max-height: 14rem;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.markdown-snapshot-version {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--tt-gray-light-a-100);
+  border-radius: var(--tt-radius-md);
+  padding: 0.5rem;
+
+  .dark & {
+    border-color: var(--tt-gray-dark-a-100);
+  }
+}
+
+.markdown-snapshot-version-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.markdown-snapshot-version-title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.markdown-snapshot-version-date {
+  font-size: 0.75rem;
+  color: var(--tt-muted-foreground);
+}
+
+.markdown-snapshot-editor-content {
   max-width: 648px;
   width: 100%;
   margin: 0 auto;
@@ -70,12 +155,12 @@ body,
   flex: 1;
 }
 
-.mardown3-editor-content .tiptap.ProseMirror.mardown3-editor {
+.markdown-snapshot-editor-content .tiptap.ProseMirror.markdown-snapshot-editor {
   flex: 1;
   padding: 3rem 3rem 30vh;
 }
 
-.mardown3-context-menu {
+.markdown-snapshot-context-menu {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -92,7 +177,9 @@ body,
   }
 }
 
-.mardown3-editor-content .tiptap.ProseMirror.mardown3-editor [data-node-locked="true"] {
+.markdown-snapshot-editor-content
+  .tiptap.ProseMirror.markdown-snapshot-editor
+  [data-node-locked="true"] {
   border-radius: var(--tt-radius-md);
   background-color: color-mix(in oklab, var(--tt-gray-light-200) 55%, transparent);
 
@@ -148,8 +235,20 @@ body,
   }
 }
 
+@media screen and (max-width: 768px) {
+  .markdown-snapshot-editor-wrapper {
+    padding-top: 17rem;
+  }
+
+  .markdown-snapshot-controls {
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+  }
+}
+
 @media screen and (max-width: 480px) {
-  .mardown3-editor-content .tiptap.ProseMirror.mardown3-editor {
+  .markdown-snapshot-editor-content .tiptap.ProseMirror.markdown-snapshot-editor {
     padding: 1rem 1.5rem 30vh;
   }
 }
