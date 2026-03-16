@@ -71,6 +71,8 @@ export interface LinkPopoverProps
    * @default true
    */
   autoOpenOnLinkActive?: boolean
+  /** Portal 容器元素，传入后弹框将渲染在该元素内（用于主题隔离）。 */
+  container?: HTMLElement | null
 }
 
 /**
@@ -213,6 +215,7 @@ export const LinkPopover = forwardRef<HTMLButtonElement, LinkPopoverProps>(
       autoOpenOnLinkActive = true,
       onClick,
       children,
+      container,
       ...buttonProps
     },
     ref
@@ -286,7 +289,7 @@ export const LinkPopover = forwardRef<HTMLButtonElement, LinkPopoverProps>(
           </LinkButton>
         </PopoverTrigger>
 
-        <PopoverContent>
+        <PopoverContent container={container}>
           <LinkMain
             url={url}
             setUrl={setUrl}

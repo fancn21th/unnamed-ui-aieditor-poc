@@ -1,0 +1,141 @@
+// ── HTML Viewer Editor ──────────────────────────────────────────────────────
+// 与 markdown2 工具栏共用 Tiptap 的 --tt-* CSS 变量体系；
+// HTML 内容靠内联样式优先级（specificity）压制 ProseMirror 默认字体规则。
+// ────────────────────────────────────────────────────────────────────────────
+
+.html-viewer-wrapper {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  // ⚠️ 不写 background / font-family，让 body 级别的 --tt-bg-color / Inter 生效，
+  // 这样工具栏外观与 markdown2 完全一致。
+
+  // Tab 切换按钮
+  .html-viewer-tab-btn {
+    padding: 2px 12px;
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    border: 1px solid var(--tt-gray-light-200, #e5e7eb);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--tt-gray-light-600, #4b5563);
+    cursor: pointer;
+    height: 28px;
+    line-height: 1;
+    transition: background 0.1s, color 0.1s;
+
+    &.active {
+      background: var(--tt-gray-light-800, #1f2937);
+      color: #fff;
+      border-color: var(--tt-gray-light-800, #1f2937);
+    }
+
+    &:hover:not(.active) {
+      background: var(--tt-gray-light-100, #f3f4f6);
+    }
+
+    .dark & {
+      border-color: var(--tt-gray-dark-200, #374151);
+      color: var(--tt-gray-dark-600, #9ca3af);
+
+      &.active {
+        background: var(--tt-gray-dark-800, #f9fafb);
+        color: #000;
+        border-color: var(--tt-gray-dark-800, #f9fafb);
+      }
+
+      &:hover:not(.active) {
+        background: var(--tt-gray-dark-100, #1f2937);
+      }
+    }
+  }
+
+  // iframe 原始预览：完全不干预 HTML 自身样式
+  .html-viewer-iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    // 高度 = 整体 100vh - 工具栏高度（由 --tt-toolbar-height 控制）
+    height: calc(100vh - var(--tt-toolbar-height, 44px));
+    display: block;
+  }
+
+  // 工具栏内的自定义按钮（重载/清空）
+  .html-viewer-action-btn {
+    padding: 2px 10px;
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    border: 1px solid var(--tt-gray-light-200, #e5e7eb);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--tt-gray-light-700, #374151);
+    cursor: pointer;
+    height: 28px;
+    line-height: 1;
+
+    &:hover {
+      background: var(--tt-gray-light-100, #f3f4f6);
+    }
+
+    .dark & {
+      border-color: var(--tt-gray-dark-200, #374151);
+      color: var(--tt-gray-dark-700, #d1d5db);
+
+      &:hover {
+        background: var(--tt-gray-dark-100, #1f2937);
+      }
+    }
+  }
+
+  .html-viewer-content {
+    // 内容区独立滚动，让工具栏固定在顶部
+    flex: 1;
+    overflow-y: auto;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px;
+
+    // ── 样式隔离说明 ────────────────────────────────────────────────────────
+    // .tiptap.ProseMirror 的字体会被 markdown2-editor.scss 里的
+    //   `.tiptap.ProseMirror { font-family: "DM Sans" }` 规则影响。
+    // test.html 的 <span style="font-family:宋体"> 等**内联样式**优先级更高
+    // (specificity 0,1,0,0 < inline style 1,0,0,0)，所以中文字体/字号不受影响。
+    // 没有内联样式的纯文本节点会显示为 DM Sans，这是预期行为。
+    // 如需完全隔离，取消下面两行注释：
+    // .tiptap.ProseMirror {
+    //   all: initial;  ← 核武器，会连 outline:none 也重置，慎用
+    // }
+    // ────────────────────────────────────────────────────────────────────────
+
+    .tiptap.ProseMirror {
+      outline: none;
+      // 为没有内联 font-family 的节点兜底使用 Times New Roman，
+      // 以贴近原始 HTML <body style="font-family: Times New Roman"> 声明。
+    //   font-family: "Times New Roman", serif;
+    //   font-size: 10pt;
+    //   line-height: 1.5;
+
+      // 优先级：inline style > 本规则 > .tiptap.ProseMirror { DM Sans }
+      // 浏览器选择器优先级相等时后声明优先，
+      // 所以把本文件的 @import 放在 markdown2-editor.scss 之后即可覆盖 DM Sans。
+
+      table {
+        border-collapse: collapse;
+        margin: 0 auto;
+        width: auto;
+
+        td, th {
+          vertical-align: top;
+          font-size: 10pt;
+        }
+      }
+
+      p {
+        margin: 0;
+      }
+    }
+  }
+}

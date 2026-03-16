@@ -13,9 +13,11 @@ import "@/components/tiptap-dev-modal/tiptap-dev-modal.scss";
 
 interface TiptapDevModalProps {
   editor: Editor | null;
+  /** Portal 容器元素，传入后弹框将渲染在该元素内（用于主题隔离）。 */
+  container?: HTMLElement | null;
 }
 
-export function TiptapDevModal({ editor }: TiptapDevModalProps) {
+export function TiptapDevModal({ editor, container }: TiptapDevModalProps) {
   const [open, setOpen] = useState(false);
   const [jsonContent, setJsonContent] = useState("{}");
 
@@ -58,6 +60,7 @@ export function TiptapDevModal({ editor }: TiptapDevModalProps) {
         align="end"
         side="top"
         sideOffset={12}
+        container={container}
         className="tiptap-dev-modal-content bg-white"
       >
         <div className="tiptap-dev-modal-header">

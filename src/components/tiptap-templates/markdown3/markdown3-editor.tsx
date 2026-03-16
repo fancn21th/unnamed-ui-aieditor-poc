@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { TableOfContentData } from "@tiptap/extension-table-of-contents";
+import { TableOfContents } from "@tiptap/extension-table-of-contents";
 import {
   EditorContent,
   EditorContext,
@@ -69,6 +71,7 @@ import { useStreamingEditor } from "@/hooks/use-streaming-editor";
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
 import { NodeLock } from "@/components/tiptap-extension/node-lock-extension";
 import { Markdown3BubbleMenu } from "@/components/tiptap-templates/markdown3/components/markdown3-bubble-menu";
+import { TocSidebar } from "@/components/tiptap-templates/markdown3/components/toc-sidebar";
 import { TiptapDevModal } from "@/components/tiptap-dev-modal";
 
 import { createStreamSimulator } from "@/lib/stream-simulator";
@@ -202,6 +205,7 @@ export function Markdown3Editor() {
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
     "main",
   );
+  const [tocItems, setTocItems] = useState<TableOfContentData>([]);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
@@ -234,6 +238,11 @@ export function Markdown3Editor() {
       Subscript,
       NodeLock.configure({
         types: LOCKABLE_NODE_TYPES,
+      }),
+      TableOfContents.configure({
+        onUpdate: (content) => {
+          setTocItems(content);
+        },
       }),
       ImageUploadNode.configure({
         accept: "image/*",
@@ -328,11 +337,16 @@ export function Markdown3Editor() {
           />
         )}
 
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="mardown3-editor-content"
-        />
+        <div className="mardown3-editor-body">
+          <EditorContent
+            editor={editor}
+            role="presentation"
+            className="mardown3-editor-content"
+          />
+          {!isMobile && (
+            <TocSidebar items={tocItems} topOffset={60} />
+          )}
+        </div>
         <TiptapDevModal editor={editor} />
       </EditorContext.Provider>
     </div>
