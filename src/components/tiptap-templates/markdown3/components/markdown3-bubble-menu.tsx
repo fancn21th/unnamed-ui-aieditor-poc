@@ -10,6 +10,7 @@ import { Button } from "@/components/tiptap-ui-primitive/button";
 interface Markdown3BubbleMenuProps {
   editor: Editor;
   lockableNodeTypes: string[];
+  onAddComment: () => void;
 }
 
 function getNodeLockStateFromState(state: EditorState, lockableNodeTypes: string[]) {
@@ -32,6 +33,7 @@ function getNodeLockStateFromState(state: EditorState, lockableNodeTypes: string
 export function Markdown3BubbleMenu({
   editor,
   lockableNodeTypes,
+  onAddComment,
 }: Markdown3BubbleMenuProps) {
   const { isBold, isItalic, isStrike, nodeLockState } = useEditorState({
     editor,
@@ -108,6 +110,13 @@ export function Markdown3BubbleMenu({
           data-active-state={isStrike ? "on" : "off"}
         >
           删除线
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onAddComment}
+        >
+          评论
         </Button>
         <Button
           type="button"

@@ -10,9 +10,9 @@ export function TocSidebar({ items, topOffset = 80 }: TocSidebarProps) {
   const handleClick = (item: TableOfContentDataItem) => {
     if (!item.dom) return;
 
-    // 找到实际的滚动容器（而非 window）
+    // 找到实际的滚动容器（三栏布局后是 .mardown3-editor-center）
     const scrollContainer = item.dom.closest(
-      ".mardown3-editor-body"
+      ".mardown3-editor-center"
     ) as HTMLElement | null;
 
     if (scrollContainer) {
@@ -60,7 +60,6 @@ export function TocSidebar({ items, topOffset = 80 }: TocSidebarProps) {
                     { "--toc-depth": depth } as CSSProperties
                   }
                   onClick={() => handleClick(item)}
-                  title={item.textContent}
                 >
                   <span className="toc-sidebar-item-text">
                     {item.textContent}
