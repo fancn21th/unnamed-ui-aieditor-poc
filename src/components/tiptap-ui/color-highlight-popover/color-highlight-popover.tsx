@@ -70,6 +70,10 @@ export interface ColorHighlightPopoverProps
    * @default false
    */
   useColorValue?: boolean
+  /**
+   * Optional container element for the popover portal.
+   */
+  container?: HTMLElement | null
 }
 
 export const ColorHighlightPopoverButton = forwardRef<
