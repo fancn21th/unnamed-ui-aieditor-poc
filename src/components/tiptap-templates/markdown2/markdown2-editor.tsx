@@ -60,6 +60,7 @@ import { useWindowSize } from "@/hooks/use-window-size";
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
+import { TiptapDevModal } from "@/components/tiptap-dev-modal";
 
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
@@ -269,6 +270,7 @@ export function Markdown2Editor() {
           role="presentation"
           className="markdown2-editor-content"
         />
+        <TiptapDevModal editor={editor} />
       </EditorContext.Provider>
     </div>
   );

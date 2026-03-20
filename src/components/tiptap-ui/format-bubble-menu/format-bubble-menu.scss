@@ -1,0 +1,16 @@
+.format-bubble-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid var(--tt-gray-light-a-100);
+  border-radius: var(--tt-radius-lg);
+  padding: 0.25rem;
+  background: var(--tt-white);
+  box-shadow: 0 6px 20px rgba(17, 24, 39, 0.12);
+
+  .dark & {
+    background: var(--tt-gray-dark-50);
+    border-color: var(--tt-gray-dark-a-100);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  }
+}

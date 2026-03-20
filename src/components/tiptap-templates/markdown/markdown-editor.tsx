@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { createStreamSimulator } from "@/lib/stream-simulator";
 import { MarkdownNodeBuffer } from "@/lib/markdown-node-buffer";
 import { useStreamingEditor } from "@/hooks/use-streaming-editor";
+import { TiptapDevModal } from "@/components/tiptap-dev-modal";
 
 // Node styles
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
@@ -94,6 +95,7 @@ export function MarkdownEditor() {
       <div className="markdown-editor-content">
         <EditorContext.Provider value={{ editor }}>
           <EditorContent editor={editor} role="presentation" />
+          <TiptapDevModal editor={editor} />
         </EditorContext.Provider>
       </div>
     </div>

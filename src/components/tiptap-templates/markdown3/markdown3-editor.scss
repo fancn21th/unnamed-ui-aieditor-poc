@@ -97,12 +97,17 @@ body,
   padding: 0.25rem;
   background: var(--tt-white);
   box-shadow: 0 6px 20px rgba(17, 24, 39, 0.12);
+  z-index: 2000;
 
   .dark & {
     background: var(--tt-gray-dark-50);
     border-color: var(--tt-gray-dark-a-100);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   }
+}
+
+.mardown3-context-menu-layer {
+  z-index: 2000;
 }
 
 .mardown3-editor-content .tiptap.ProseMirror.mardown3-editor [data-node-locked="true"] {
@@ -515,4 +520,3 @@ body,
   justify-content: flex-end;
   gap: 0.5rem;
 }
-

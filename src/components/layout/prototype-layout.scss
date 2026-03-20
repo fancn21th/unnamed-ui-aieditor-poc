@@ -1,0 +1,63 @@
+.proto-switcher {
+  &__trigger {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 9999;
+    box-shadow: 0 10px 26px rgba(17, 24, 39, 0.24);
+    // 覆盖 brand 色为品牌紫，与右下角的蓝色 JSON 按钮区分
+    --tt-brand-color-500: #7c3aed;
+    --tt-brand-color-600: #6d28d9;
+  }
+
+  &__content {
+    min-width: 120px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+    padding: 4px;
+    z-index: 9999;
+    animation: protoFadeIn 0.12s ease;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    user-select: none;
+
+    &:hover,
+    &[data-highlighted] {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    &--active {
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+  }
+
+  &__item-check {
+    color: #7c3aed;
+    font-size: 12px;
+    margin-left: 8px;
+  }
+}
+
+@keyframes protoFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

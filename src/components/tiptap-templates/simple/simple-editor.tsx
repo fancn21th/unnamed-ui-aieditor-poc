@@ -66,6 +66,7 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 
 // --- Components ---
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
+import { TiptapDevModal } from "@/components/tiptap-dev-modal";
 
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
@@ -274,6 +275,7 @@ export function SimpleEditor() {
           role="presentation"
           className="simple-editor-content"
         />
+        <TiptapDevModal editor={editor} />
       </EditorContext.Provider>
     </div>
   );

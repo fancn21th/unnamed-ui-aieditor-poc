@@ -1,0 +1,35 @@
+.bubble-menu-editor-wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bubble-menu-editor-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.bubble-menu-editor-center {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.bubble-menu-editor-content {
+  max-width: 648px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bubble-menu-editor-content .tiptap.ProseMirror.bubble-menu-editor {
+  padding: 3rem 3rem 30vh;
+}
+
+@media screen and (max-width: 480px) {
+  .bubble-menu-editor-content .tiptap.ProseMirror.bubble-menu-editor {
+    padding: 1rem 1.5rem 30vh;
+  }
+}

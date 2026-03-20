@@ -1,0 +1,36 @@
+.comments-editor-wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.comments-editor-body {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+}
+
+.comments-editor-center {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.comments-editor-content {
+  max-width: 648px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.comments-editor-content .tiptap.ProseMirror.comments-editor {
+  padding: 3rem 3rem 30vh;
+}
+
+@media screen and (max-width: 480px) {
+  .comments-editor-content .tiptap.ProseMirror.comments-editor {
+    padding: 1rem 1.5rem 30vh;
+  }
+}

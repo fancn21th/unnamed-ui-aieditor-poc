@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
-import { posToDOMRect } from "@tiptap/core";
+import { useCallback } from "react";
 import type { Editor, EditorStateSnapshot } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
-import { TextSelection, type EditorState } from "@tiptap/pm/state";
+import type { EditorState } from "@tiptap/pm/state";
 import { Button } from "@/components/tiptap-ui-primitive/button";
 
 interface Markdown3BubbleMenuProps {
@@ -81,61 +80,25 @@ export function Markdown3BubbleMenu({
     editor.chain().focus().toggleCurrentNodeLock().run();
   }, [editor, nodeLockState.available]);
 
-  const bubbleMenuRef = useRef<HTMLDivElement>(null);
-
-  // 在 scroll 事件内同步直接更新菜单位置，消除 1 帧延迟，实现真正的丝滑跟随
-  useEffect(() => {
-    if (!scrollContainer) return;
-    const onScroll = () => {
-      const el = bubbleMenuRef.current;
-      if (!el) return;
-
-      const { state, view } = editor;
-      const { selection } = state;
-      if (selection.empty) return;
-
-      const selRect = posToDOMRect(view, selection.from, selection.to);
-      const elWidth = el.offsetWidth;
-      const elHeight = el.offsetHeight;
-      if (!elWidth || !elHeight) return;
-
-      // 选中文字滚出视口时隐藏菜单
-      if (selRect.bottom < 0 || selRect.top > window.innerHeight) {
-        el.style.visibility = "hidden";
-        return;
-      }
-      el.style.visibility = "visible";
-
-      const gap = 8;
-      let top = selRect.top - elHeight - gap;
-      let left = selRect.left + selRect.width / 2 - elWidth / 2;
-
-      // 上方空间不足时翻转到下方
-      if (top < gap) top = selRect.bottom + gap;
-      // 水平方向不超出视口
-      left = Math.max(gap, Math.min(left, window.innerWidth - elWidth - gap));
-
-      el.style.left = `${left}px`;
-      el.style.top = `${top}px`;
-    };
-    scrollContainer.addEventListener("scroll", onScroll, { passive: true });
-    return () => scrollContainer.removeEventListener("scroll", onScroll);
-  }, [scrollContainer, editor]);
-
   return (
     <BubbleMenu
-      ref={bubbleMenuRef}
+      className="mardown3-context-menu-layer"
       editor={editor}
+      appendTo={() => document.body}
+      updateDelay={0}
       options={{
         placement: "top",
         strategy: "fixed",
         hide: true,
+        scrollTarget: scrollContainer ?? window,
       }}
       shouldShow={({ state }: { state: EditorState }) => {
-        return state.selection instanceof TextSelection && !state.selection.empty;
+        const { from, to, empty } = state.selection;
+        if (empty) return false;
+        return state.doc.textBetween(from, to).trim().length > 0;
       }}
     >
-      <div className="mardown3-context-menu" >
+      <div className="mardown3-context-menu">
         <Button
           type="button"
           variant="ghost"

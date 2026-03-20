@@ -5,14 +5,15 @@ import { getTocDepth, calcScrollTarget } from "@/lib/toc-utils";
 interface TocSidebarProps {
   items: TableOfContentDataItem[];
   topOffset?: number;
+  scrollContainerClassName?: string;
 }
 
-export function TocSidebar({ items, topOffset = 80 }: TocSidebarProps) {
+export function TocSidebar({ items, topOffset = 80, scrollContainerClassName = "mardown3-editor-center" }: TocSidebarProps) {
   const handleClick = (item: TableOfContentDataItem) => {
     if (!item.dom) return;
 
     const scrollContainer = item.dom.closest(
-      ".mardown3-editor-center"
+      `.${scrollContainerClassName}`
     ) as HTMLElement | null;
 
     if (scrollContainer) {
