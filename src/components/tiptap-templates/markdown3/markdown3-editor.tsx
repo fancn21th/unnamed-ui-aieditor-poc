@@ -84,7 +84,7 @@ import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 import "@/components/tiptap-templates/markdown3/markdown3-editor.scss";
 import content from "@/components/tiptap-templates/markdown3/data/gfm-simple.md?raw";
-import htmlContent from "/mockData/test.html?raw";
+// import htmlContent from "/mockData/test.html?raw";
 const LOCKABLE_NODE_TYPES = [
   "paragraph",
   "heading",
@@ -221,6 +221,7 @@ export function Markdown3Editor() {
   }>({ open: false, mode: "add", pendingFrom: 0, pendingTo: 0 });
   const { comments, addComment, updateComment, deleteComment } = useComments();
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -267,8 +268,8 @@ export function Markdown3Editor() {
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],
-    content: htmlContent,
-    contentType: "html",
+    content,
+    contentType: "markdown",
   });
 
   const { processMessage, reset } = useStreamingEditor(editor);
@@ -422,6 +423,7 @@ export function Markdown3Editor() {
             editor={editor}
             lockableNodeTypes={LOCKABLE_NODE_TYPES}
             onAddComment={handleAddComment}
+            scrollContainer={scrollContainer}
           />
         )}
 
@@ -430,6 +432,7 @@ export function Markdown3Editor() {
             <TocSidebar items={tocItems} topOffset={60} />
           )}
           <div
+            ref={setScrollContainer}
             className="mardown3-editor-center"
             onClick={handleEditorClick}
           >
